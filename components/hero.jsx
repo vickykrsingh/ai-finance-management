@@ -43,7 +43,7 @@ function HeroSection() {
                         </Button>
                     </Link>
                     <Link href={'/youtube.com'}>
-                        <Button size="lg" className="px-8">
+                        <Button  variant="outline" size="lg" className="px-8">
                             Watch Demo
                         </Button>
                     </Link>

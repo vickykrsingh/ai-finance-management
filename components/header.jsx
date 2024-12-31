@@ -14,8 +14,15 @@ function Header() {
             alt="welth logo"
             width={200}
             height={60}
-            src={"/logo.png"}
-            className="h-12 w-auto object-contain"
+            src={"/logo1.png"}
+            className="h-12 scale-[2.5] w-auto object-contain hidden md:inline"
+          />
+          <Image
+            alt="welth logo"
+            width={100}
+            height={100}
+            src={"/logo2.png"}
+            className="h-12 w-auto object-contain md:hidden inline"
           />
         </Link>
 

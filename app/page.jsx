@@ -13,11 +13,11 @@ export default function Home() {
       {/* Stats section */}
       <section className="py-20 bg-emerald-50">
         <div className="container mx-auto px-4">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {
               statsData.map((stats,index)=>(
                 <div key={index} className="text-center">
-                  <div className="text-4xl font-bold text-emerald-600 mb-2">{stats.label}</div>
+                  <div className="text-lg font-bold text-emerald-600 mb-2">{stats.label}</div>
                   <div className="text-gray-600">{stats.value}</div>
                 </div>
               ))

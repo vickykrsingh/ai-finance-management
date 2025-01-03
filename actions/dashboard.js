@@ -11,7 +11,6 @@ const serializeTransaction = (obj) => {
         serialized.balance = obj.balance.toNumber();
     }
 
-    return serialized;
 }
 
 export async function createAccount(data){
@@ -31,7 +30,7 @@ export async function createAccount(data){
 
         // Convert balance to float before saving
         const balanceFloat = parseFloat(data.balance);
-        if(!isNaN(balanceFloat)){
+        if(isNaN(balanceFloat)){
             throw new Error("Invalid balance amount");
         }
 

@@ -100,8 +100,8 @@ export async function getUserAccounts(){
             }
         })
 
-        const serializedAccount = accounts.map(serializeTransaction)
-        console.log(serializedAccount)
+        const serializedAccount = accounts.map((acc)=>serializeTransaction(acc))
+        // console.log(serializedAccount)
         return serializedAccount;
     } catch (error) {
         throw new Error(error.message)

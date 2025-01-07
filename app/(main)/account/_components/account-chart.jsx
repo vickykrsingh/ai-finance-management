@@ -14,7 +14,6 @@ import {
   BarChart,
   CartesianGrid,
   Legend,
-  Rectangle,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -134,20 +133,25 @@ function AccountChart({ transactions }) {
               >
                 <CartesianGrid strokeDasharray="3 3" vertical={false} />
                 <XAxis dataKey="date" />
-                <YAxis fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value)=>`$${value}`} />
-                <Tooltip formatter={(value)=>[`$${value}`,undefined]} />
+                <YAxis
+                  fontSize={12}
+                  tickLine={false}
+                  axisLine={false}
+                  tickFormatter={(value) => `$${value}`}
+                />
+                <Tooltip formatter={(value) => [`$${value}`, undefined]} />
                 <Legend />
                 <Bar
                   dataKey="income"
                   name="Income"
                   fill="#22c55e"
-                  radius={[4,4,0,0]}
+                  radius={[4, 4, 0, 0]}
                 />
                 <Bar
                   dataKey="expense"
                   name="Expense"
                   fill="#ef4444"
-                  radius={[4,4,0,0]}
+                  radius={[4, 4, 0, 0]}
                 />
               </BarChart>
             </ResponsiveContainer>

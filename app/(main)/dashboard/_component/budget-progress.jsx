@@ -124,7 +124,7 @@ function BudgetProgress({ initialBudget, currentExpenses }) {
                   ? "bg-yellow-500"
                   : "bg-green-500"
               }`}
-              value={percentUsed}
+              value={percentUsed<=100?percentUsed:100}
             />
           </div>
         )}

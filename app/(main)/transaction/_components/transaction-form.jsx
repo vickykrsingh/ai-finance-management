@@ -26,6 +26,7 @@ import { useRouter } from "next/navigation";
 import React, { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
+import ReceiptScanner from "./receipt-scanner";
 
 function AddTransactionForm({ accounts, categories }) {
   const {
@@ -44,7 +45,8 @@ function AddTransactionForm({ accounts, categories }) {
       description: "",
       accountId: accounts.find((ac) => ac.isDefault)?.id,
       date: new Date(),
-      isRecurring: false,
+      isRecurring:false,
+      // category:""
     },
   });
   const {
@@ -67,7 +69,7 @@ function AddTransactionForm({ accounts, categories }) {
   }
 
   const filteredCategories = categories.filter(
-    (category) => category.type == type
+    (category) => category.type === type
   );
 
   useEffect(()=>{
@@ -78,9 +80,27 @@ function AddTransactionForm({ accounts, categories }) {
     }
   },[transactionResult,transactionLoading])
 
+  const handleScanComplete = async (scannedData) => {
+    console.log(scannedData)
+    if(scannedData){
+      setValue("amount",scannedData.amount.toString());
+      setValue("date",new Date(scannedData.date));
+      if(scannedData.description){
+        setValue("description",scannedData.description)
+      }
+      if(scannedData.category){
+        console.log(getValues("category"))
+        setValue("category",scannedData.category)
+      }
+    }
+  }
+
+  
+
   return (
     <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
       {/* AI Recipt Scanner */}
+      <ReceiptScanner onScanComplete={handleScanComplete} />
 
       <div className="space-y-2">
         <label className="text-sm font-medium">Type</label>
@@ -148,9 +168,10 @@ function AddTransactionForm({ accounts, categories }) {
         <Select
           onValueChange={(value) => setValue("category", value)}
           defaultValue={getValues("category")}
+          value={getValues("category")}
         >
           <SelectTrigger className="">
-            <SelectValue placeholder="Select category" />
+            <SelectValue defaultValue={getValues("category")} placeholder="Select category" />
           </SelectTrigger>
           <SelectContent>
             {filteredCategories.map((category) => (

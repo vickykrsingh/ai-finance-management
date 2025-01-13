@@ -1,4 +1,4 @@
-"use server"
+"use server";
 import aj from "@/lib/arcjet";
 import { db } from "@/lib/prisma";
 import { request } from "@arcjet/next";
@@ -6,7 +6,7 @@ import { auth } from "@clerk/nextjs/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { revalidatePath } from "next/cache";
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY)
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 function calculateNextRecurringDate(startDate, interval) {
   const date = new Date(startDate);
@@ -30,9 +30,9 @@ function calculateNextRecurringDate(startDate, interval) {
 }
 
 const serializeAmount = (obj) => ({
-    ...obj,
-    amount:obj.amount.toNumber(),
-})
+  ...obj,
+  amount: obj.amount.toNumber(),
+});
 
 export async function createTransaction(data) {
   try {
@@ -43,25 +43,25 @@ export async function createTransaction(data) {
     // Get request data for ArcJet
     const req = await request();
 
-    // Check rate limit 
-    const decision = await aj.protect(req,{
+    // Check rate limit
+    const decision = await aj.protect(req, {
       userId,
-      requested:1, // Specify how many tokens to consume
-    })
+      requested: 1, // Specify how many tokens to consume
+    });
 
-    if(decision.isDenied()){
-      if(decision.reason.isRateLimit()){
-        const {remaining,reset} = decision.reason;
+    if (decision.isDenied()) {
+      if (decision.reason.isRateLimit()) {
+        const { remaining, reset } = decision.reason;
         console.log({
-          code:"RATE_LIMIT_EXCEEDED",
-          details:{
+          code: "RATE_LIMIT_EXCEEDED",
+          details: {
             remaining,
-            resetInSeconds:reset,
-          }
-        })
+            resetInSeconds: reset,
+          },
+        });
         throw new Error("Too many requests. Please try again later.");
       }
-      throw new Error("Request Blocked")
+      throw new Error("Request Blocked");
     }
 
     const user = await db.user.findUnique({
@@ -101,9 +101,9 @@ export async function createTransaction(data) {
       });
 
       await tx.account.update({
-        where:{id:data.accountId},
-        data:{balance:newBalance},
-      })
+        where: { id: data.accountId },
+        data: { balance: newBalance },
+      });
 
       return newTransaction;
     });
@@ -111,20 +111,19 @@ export async function createTransaction(data) {
     revalidatePath("/dashboard");
     revalidatePath(`/account/${transaction.accountId}`);
 
-    return {success:true,data:serializeAmount(transaction)};
-
+    return { success: true, data: serializeAmount(transaction) };
   } catch (error) {
     throw new Error(error.message);
   }
 }
 
-export async function scanReceipt(file){
+export async function scanReceipt(file) {
   try {
-    const model = genAI.getGenerativeModel({model:"gemini-1.5-flash"});
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
     // Convert File to ArrayBuffer
     const arrayBuffer = await file.arrayBuffer();
-    
+
     // Convert ArrayBuffer to Bas64
     const base64String = Buffer.from(arrayBuffer).toString("base64");
 
@@ -149,32 +148,113 @@ export async function scanReceipt(file){
 
     const result = await model.generateContent([
       {
-        inlineData:{
-          data:base64String,
-          mimeType:file.type,
+        inlineData: {
+          data: base64String,
+          mimeType: file.type,
         },
       },
-      prompt
-    ])
+      prompt,
+    ]);
     const response = await result.response;
     const text = response.text();
     // the text is something like that /```JSON data JSON```/ so that remove the /```JSON and JSON```/
-    const cleanedText = text.replace(/```(?:json)?\n?/g,"").trim();
+    const cleanedText = text.replace(/```(?:json)?\n?/g, "").trim();
     try {
       const data = JSON.parse(cleanedText);
       return {
         amount: parseFloat(data.amount),
         date: new Date(data.date),
-        description:data.description,
-        category:data.category,
-        merchantName:data.merchantName
-      }
+        description: data.description,
+        category: data.category,
+        merchantName: data.merchantName,
+      };
     } catch (parseError) {
-      console.log("Error parsing JSON response: ",parseError);
+      console.log("Error parsing JSON response: ", parseError);
       throw new Error("Invalid response format from Gemini");
     }
   } catch (error) {
-    console.log("Error scanning receipt: ",error.message)
+    console.log("Error scanning receipt: ", error.message);
     throw new Error("Failed to scan receipt");
+  }
+}
+
+export async function getTransaction(id) {
+  const { userId } = await auth();
+  if (!userId) throw new Error("Unauthorized");
+
+  const user = await db.user.findUnique({
+    where: { clerkUserId: userId },
+  });
+  if (!user) throw new Error("User not found");
+
+  const transaction = await db.transaction.findUnique({
+    where: { id, userId: user.id },
+  });
+
+  if(!transaction) throw new Error("Transaction not found");
+
+  return serializeAmount(transaction);
+}
+
+
+export async function updateTransaction(id,data){
+  try {
+    const {userId} = await auth();
+    if(!userId) throw new Error("Unauthorized");
+
+    const user = await db.user.findUnique({
+      where:{clerkUserId:userId}
+    });
+    if(!user) throw new Error("User not found");
+
+    const origionalTransaction = await db.transaction.findUnique({
+      where:{
+        id,
+        userId:user.id
+      },
+      include:{
+        account:true
+      },
+    })
+
+    if(!origionalTransaction) throw new Error("Transaction not found");
+
+    const oldBalanceChange = origionalTransaction.type === "EXPENSE" ? -origionalTransaction.amount.toNumber() : origionalTransaction.amount.toNumber();
+
+    const newBalanceChange = data.type === "EXPENSE" ? -data.amount : data.amount;
+
+    const netBalanceChange = newBalanceChange - oldBalanceChange;
+
+    // Update transaction and account balance in a transaction
+    const transaction = await db.$transaction(async (tx)=>{
+      const updated = await tx.transaction.update({
+        where:{
+          id,
+          userId:user.id
+        },
+        data:{
+          ...data,
+          nextRecurringDate:data.isRecurring && data.recurringInterval ? calculateNextRecurringDate(data.date,data.recurringInterval) : null,
+        }
+      })
+      // update account balance 
+      await tx.account.update({
+        where:{id:data.accountId},
+        data:{
+          balance:{
+            increment:netBalanceChange
+          }
+        }
+      })
+      return updated;
+    })
+
+    revalidatePath("/dashboard");
+    revalidatePath(`/account/${data.accountId}`);
+
+    return {success:true,data:serializeAmount(transaction)}
+
+  } catch (error) {
+    throw new Error(error.message)
   }
 }

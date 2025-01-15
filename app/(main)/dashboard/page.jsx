@@ -23,7 +23,7 @@ async function Dashboard() {
   return (
     <section className="px-5 space-y-8">
       {/* Budget Progress */}
-      {defaultAccount && (
+      {defaultAccount && budgetData && (
         <BudgetProgress
           initialBudget={budgetData?.budget}
           currentExpenses={budgetData?.currentExpenses || 0}

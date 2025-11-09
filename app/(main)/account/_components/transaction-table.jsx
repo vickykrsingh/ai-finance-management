@@ -353,7 +353,7 @@ function TransactionTable({ transactions }) {
                     />
                   </TableCell>
                   <TableCell className="font-semibold text-gray-700 py-4">
-                    {format(new Date(transaction.date), "PP")}
+                    {format(new Date(transaction.date), "MMM dd, yyyy")}
                   </TableCell>
                   <TableCell className="py-4">
                     <span className="text-gray-900 font-medium">

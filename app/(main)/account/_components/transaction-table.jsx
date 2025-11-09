@@ -38,6 +38,10 @@ import { format } from "date-fns";
 import {
   ChevronDown,
   ChevronUp,
+  ChevronLeft,
+  ChevronRight,
+  ChevronsLeft,
+  ChevronsRight,
   Clock,
   MoreHorizontal,
   RefreshCw,
@@ -60,6 +64,8 @@ const RECURRING_INTERVALS = {
 function TransactionTable({ transactions }) {
   const router = useRouter();
   const [selectedIds, setSelectedIds] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
   const [sortConfig, setSortConfig] = useState({
     field: "date",
     direction: "desc",
@@ -118,6 +124,25 @@ function TransactionTable({ transactions }) {
     return result;
   }, [transactions, searchTerm, typeFilter, recurringFilter, sortConfig]);
 
+  // Pagination calculations
+  const totalPages = Math.ceil(filteredAndSortedTransactions.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedTransactions = filteredAndSortedTransactions.slice(startIndex, endIndex);
+  const totalItems = filteredAndSortedTransactions.length;
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, typeFilter, recurringFilter, sortConfig]);
+
+  // Reset page if current page exceeds total pages
+  useEffect(() => {
+    if (currentPage > totalPages && totalPages > 0) {
+      setCurrentPage(totalPages);
+    }
+  }, [totalPages, currentPage]);
+
   const handleSort = (field) => {
     setSortConfig((current) => ({
       field,
@@ -134,9 +159,9 @@ function TransactionTable({ transactions }) {
   };
   const handleSelectAll = () => {
     setSelectedIds((current) =>
-      current.length === filteredAndSortedTransactions.length
+      current.length === paginatedTransactions.length
         ? []
-        : filteredAndSortedTransactions.map((t) => t.id)
+        : paginatedTransactions.map((t) => t.id)
     );
   };
   const handleBulkDelete = () => {
@@ -228,24 +253,24 @@ function TransactionTable({ transactions }) {
       <div className="rounded-xl border-2 border-purple-100 shadow-lg overflow-hidden bg-white">
         <Table>
           <TableHeader>
-            <TableRow className="bg-gradient-to-r from-purple-50 to-pink-50 hover:from-purple-100 hover:to-pink-100">
-              <TableHead className="w-[50px]">
+            <TableRow className="bg-gradient-to-r from-purple-50 to-pink-50 hover:from-purple-100 hover:to-pink-100 border-b-2 border-purple-200">
+              <TableHead className="w-[50px] pl-6">
                 <Checkbox
                   onCheckedChange={handleSelectAll}
                   checked={
-                    selectedIds.length ===
-                      filteredAndSortedTransactions.length &&
-                    filteredAndSortedTransactions.length > 0
+                    paginatedTransactions.length > 0 &&
+                    paginatedTransactions.every(t => selectedIds.includes(t.id))
                   }
                   className="border-purple-400"
                 />
               </TableHead>
               <TableHead
-                className="cursor-pointer font-bold text-gray-900"
+                className="cursor-pointer font-bold text-gray-900 py-4"
                 onClick={() => handleSort("date")}
               >
-                <div className="flex items-center">
-                  📅 Date{" "}
+                <div className="flex items-center gap-1">
+                  <span className="text-lg">📅</span>
+                  <span>Date</span>
                   {sortConfig.field === "date" &&
                     (sortConfig.direction === "asc" ? (
                       <ChevronUp className="ml-1 h-4 w-4 text-purple-600" />
@@ -254,13 +279,19 @@ function TransactionTable({ transactions }) {
                     ))}
                 </div>
               </TableHead>
-              <TableHead className="font-bold text-gray-900">📝 Description</TableHead>
+              <TableHead className="font-bold text-gray-900 py-4">
+                <div className="flex items-center gap-1">
+                  <span className="text-lg">📝</span>
+                  <span>Description</span>
+                </div>
+              </TableHead>
               <TableHead
-                className="cursor-pointer font-bold text-gray-900"
+                className="cursor-pointer font-bold text-gray-900 py-4"
                 onClick={() => handleSort("category")}
               >
-                <div className="flex items-center">
-                  🏷️ Category{" "}
+                <div className="flex items-center gap-1">
+                  <span className="text-lg">🏷️</span>
+                  <span>Category</span>
                   {sortConfig.field === "category" &&
                     (sortConfig.direction === "asc" ? (
                       <ChevronUp className="ml-1 h-4 w-4 text-purple-600" />
@@ -270,11 +301,12 @@ function TransactionTable({ transactions }) {
                 </div>
               </TableHead>
               <TableHead
-                className="cursor-pointer font-bold text-gray-900"
+                className="cursor-pointer font-bold text-gray-900 py-4"
                 onClick={() => handleSort("amount")}
               >
-                <div className="flex items-center justify-end">
-                  💵 Amount{" "}
+                <div className="flex items-center justify-end gap-1">
+                  <span className="text-lg">💵</span>
+                  <span>Amount</span>
                   {sortConfig.field === "amount" &&
                     (sortConfig.direction === "asc" ? (
                       <ChevronUp className="ml-1 h-4 w-4 text-purple-600" />
@@ -283,70 +315,81 @@ function TransactionTable({ transactions }) {
                     ))}
                 </div>
               </TableHead>
-              <TableHead className="font-bold text-gray-900">🔄 Recurring</TableHead>
-              <TableHead className="w-[50px] font-bold text-gray-900">⚙️</TableHead>
+              <TableHead className="font-bold text-gray-900 py-4">
+                <div className="flex items-center gap-1">
+                  <span className="text-lg">🔄</span>
+                  <span>Recurring</span>
+                </div>
+              </TableHead>
+              <TableHead className="w-[80px] font-bold text-gray-900 py-4 pr-6 text-center">
+                <span className="text-lg">⚙️</span>
+              </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filteredAndSortedTransactions.length === 0 ? (
+            {paginatedTransactions.length === 0 ? (
               <TableRow>
                 <TableCell
                   colSpan={7}
-                  className="text-center py-12"
+                  className="text-center py-16"
                 >
                   <div className="flex flex-col items-center gap-3">
-                    <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center">
-                      <span className="text-3xl">📋</span>
+                    <div className="w-20 h-20 bg-purple-100 rounded-full flex items-center justify-center">
+                      <span className="text-4xl">📋</span>
                     </div>
-                    <p className="text-gray-600 font-semibold">No Transactions Found</p>
+                    <p className="text-gray-700 font-bold text-lg">No Transactions Found</p>
                     <p className="text-sm text-gray-500">Try adjusting your filters or add a new transaction</p>
                   </div>
                 </TableCell>
               </TableRow>
             ) : (
-              filteredAndSortedTransactions.map((transaction) => (
-                <TableRow key={transaction.id} className="hover:bg-purple-50 transition-colors">
-                  <TableCell>
+              paginatedTransactions.map((transaction) => (
+                <TableRow key={transaction.id} className="hover:bg-purple-50/50 transition-colors border-b border-purple-100">
+                  <TableCell className="pl-6">
                     <Checkbox
                       onCheckedChange={() => handleSelect(transaction.id)}
                       checked={selectedIds.includes(transaction.id)}
                       className="border-purple-400"
                     />
                   </TableCell>
-                  <TableCell className="font-medium text-gray-700">
+                  <TableCell className="font-semibold text-gray-700 py-4">
                     {format(new Date(transaction.date), "PP")}
                   </TableCell>
-                  <TableCell className="font-semibold text-gray-900">{transaction.description}</TableCell>
-                  <TableCell className="capitalize">
+                  <TableCell className="py-4">
+                    <span className="text-gray-900 font-medium">
+                      {transaction.description}
+                    </span>
+                  </TableCell>
+                  <TableCell className="capitalize py-4">
                     <Badge
                       style={{
-                        background: categoryColors[transaction.category],
+                        backgroundColor: categoryColors[transaction.category],
                       }}
-                      className="px-3 py-1 rounded-full text-white text-sm font-semibold shadow-md"
+                      className="px-3 py-1.5 rounded-full text-white text-xs font-bold shadow-sm"
                     >
                       {transaction.category}
                     </Badge>
                   </TableCell>
-                  <TableCell className="text-right">
+                  <TableCell
+                    className="text-right font-bold text-base py-4"
+                  >
                     <span
-                      className={`font-bold text-lg ${
-                        transaction.type === "EXPENSE" ? "text-red-600" : "text-green-600"
-                      }`}
+                      className={transaction.type === "EXPENSE" ? "text-red-600" : "text-green-600"}
                     >
                       {transaction.type === "EXPENSE" ? "-" : "+"}$
                       {transaction.amount.toFixed(2)}
                     </span>
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="py-4">
                     {transaction.isRecurring ? (
                       <TooltipProvider>
                         <Tooltip>
                           <TooltipTrigger>
                             <Badge
                               variant="outline"
-                              className="gap-1 bg-gradient-to-r from-purple-100 to-pink-100 hover:from-purple-200 hover:to-pink-200 text-purple-700 border-purple-300 font-semibold"
+                              className="gap-1.5 bg-purple-100 hover:bg-purple-200 text-purple-700 border-purple-300 px-3 py-1.5 font-semibold"
                             >
-                              <RefreshCw className="h-3 w-3" />
+                              <RefreshCw className="h-3.5 w-3.5" />
                               {
                                 RECURRING_INTERVALS[
                                   transaction.recurringInterval
@@ -355,48 +398,54 @@ function TransactionTable({ transactions }) {
                             </Badge>
                           </TooltipTrigger>
                           <TooltipContent>
-                            <div className="text-sm">
-                              <div className="font-medium">Next Date:</div>
-                              <div>
-                                {format(
-                                  new Date(transaction.nextRecurringDate),
-                                  "PP"
-                                )}
-                              </div>
+                            <div className="flex items-center gap-2">
+                              <Clock className="h-4 w-4" />
+                              <span>
+                                Recurs{" "}
+                                {
+                                  RECURRING_INTERVALS[
+                                    transaction.recurringInterval
+                                  ]
+                                }
+                              </span>
                             </div>
                           </TooltipContent>
                         </Tooltip>
                       </TooltipProvider>
                     ) : (
-                      <Badge variant="outline" className="gap-1">
-                        <Clock className="h-3 w-3" />
+                      <Badge
+                        variant="outline"
+                        className="gap-1.5 bg-gray-100 text-gray-600 border-gray-300 px-3 py-1.5 font-semibold"
+                      >
+                        <Clock className="h-3.5 w-3.5" />
                         One-time
                       </Badge>
                     )}
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="pr-6 py-4">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="h-8 w-8 p-0">
-                          <MoreHorizontal className="w-4 h-4" />
+                        <Button variant="ghost" className="h-8 w-8 p-0 hover:bg-purple-100">
+                          <MoreHorizontal className="w-4 h-4 text-gray-600" />
                         </Button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent>
+                      <DropdownMenuContent align="end" className="border-purple-200">
                         <DropdownMenuItem
                           onClick={() =>
                             router.push(
                               `/transaction/create?edit=${transaction.id}`
                             )
                           }
+                          className="cursor-pointer font-medium"
                         >
-                          Edit
+                          <span className="mr-2">✏️</span> Edit
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem
-                          className="text-destructive"
+                          className="text-red-600 cursor-pointer font-medium focus:text-red-700 focus:bg-red-50"
                           onClick={() => deleteFn([transaction.id])}
                         >
-                          Delete
+                          <span className="mr-2">🗑️</span> Delete
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
@@ -407,6 +456,118 @@ function TransactionTable({ transactions }) {
           </TableBody>
         </Table>
       </div>
+
+      {/* Pagination Controls */}
+      {totalItems > 0 && (
+        <div className="bg-white rounded-xl shadow-lg p-4 border-2 border-purple-100">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            {/* Items per page selector */}
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-semibold text-gray-700">Rows per page:</span>
+              <Select
+                value={itemsPerPage.toString()}
+                onValueChange={(value) => {
+                  setItemsPerPage(Number(value));
+                  setCurrentPage(1);
+                }}
+              >
+                <SelectTrigger className="w-[80px] border-purple-300 focus:border-purple-500 focus:ring-purple-500">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="5">5</SelectItem>
+                  <SelectItem value="10">10</SelectItem>
+                  <SelectItem value="20">20</SelectItem>
+                  <SelectItem value="50">50</SelectItem>
+                  <SelectItem value="100">100</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Page info */}
+            <div className="text-sm font-semibold text-gray-700">
+              Showing {startIndex + 1} to {Math.min(endIndex, totalItems)} of {totalItems} transactions
+            </div>
+
+            {/* Pagination buttons */}
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => setCurrentPage(1)}
+                disabled={currentPage === 1}
+                className="h-8 w-8 border-purple-300 hover:bg-purple-50 disabled:opacity-50"
+                title="First page"
+              >
+                <ChevronsLeft className="h-4 w-4 text-purple-600" />
+              </Button>
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+                disabled={currentPage === 1}
+                className="h-8 w-8 border-purple-300 hover:bg-purple-50 disabled:opacity-50"
+                title="Previous page"
+              >
+                <ChevronLeft className="h-4 w-4 text-purple-600" />
+              </Button>
+
+              {/* Page numbers */}
+              <div className="flex items-center gap-1">
+                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                  let pageNumber;
+                  if (totalPages <= 5) {
+                    pageNumber = i + 1;
+                  } else if (currentPage <= 3) {
+                    pageNumber = i + 1;
+                  } else if (currentPage >= totalPages - 2) {
+                    pageNumber = totalPages - 4 + i;
+                  } else {
+                    pageNumber = currentPage - 2 + i;
+                  }
+
+                  return (
+                    <Button
+                      key={pageNumber}
+                      variant={currentPage === pageNumber ? "default" : "outline"}
+                      size="icon"
+                      onClick={() => setCurrentPage(pageNumber)}
+                      className={`h-8 w-8 ${
+                        currentPage === pageNumber
+                          ? "bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:from-purple-700 hover:to-pink-700"
+                          : "border-purple-300 hover:bg-purple-50"
+                      }`}
+                    >
+                      {pageNumber}
+                    </Button>
+                  );
+                })}
+              </div>
+
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
+                disabled={currentPage === totalPages}
+                className="h-8 w-8 border-purple-300 hover:bg-purple-50 disabled:opacity-50"
+                title="Next page"
+              >
+                <ChevronRight className="h-4 w-4 text-purple-600" />
+              </Button>
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => setCurrentPage(totalPages)}
+                disabled={currentPage === totalPages}
+                className="h-8 w-8 border-purple-300 hover:bg-purple-50 disabled:opacity-50"
+                title="Last page"
+              >
+                <ChevronsRight className="h-4 w-4 text-purple-600" />
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

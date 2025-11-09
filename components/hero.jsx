@@ -1,5 +1,5 @@
 "use client"
-import Link from 'next/link'
+import ProgressLink from './progress-link'
 import { useEffect, useRef } from 'react'
 import { Button } from './ui/button'
 import Image from 'next/image'
@@ -37,16 +37,16 @@ function HeroSection() {
             </p>
             <div className='flex flex-col justify-center space-x-4 my-6'>
                 <div className='flex gap-2 justify-center'>
-                    <Link href={'/dashboard'}>
+                    <ProgressLink href={'/dashboard'}>
                         <Button size="lg" className="px-8">
                             Get Started
                         </Button>
-                    </Link>
-                    <Link href={'/youtube.com'}>
+                    </ProgressLink>
+                    <ProgressLink href={'/youtube.com'}>
                         <Button  variant="outline" size="lg" className="px-8">
                             Watch Demo
                         </Button>
-                    </Link>
+                    </ProgressLink>
                 </div>
                 <div className='hero-image-wrapper'>
                     <div ref={imageRef} className='hero-image'>

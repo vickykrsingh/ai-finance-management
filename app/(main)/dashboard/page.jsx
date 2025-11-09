@@ -7,31 +7,61 @@ import AccountCard from "./_component/account-card";
 import { getCurrentBudget } from "@/actions/budget";
 import BudgetProgress from "./_component/budget-progress";
 import DashboardOverview from "./_component/dashboard-overview";
+import { BudgetSkeleton, OverviewSkeleton, SkeletonCard } from "@/components/loading";
 
-async function Dashboard() {
+// Mark this page as dynamic since it uses server-side auth/headers
+export const dynamic = 'force-dynamic';
+
+// Separate async components for each section
+async function BudgetSection() {
   const accounts = await getUserAccounts();
-
   const defaultAccount = accounts?.find((account) => account.isDefault);
+  
+  if (!defaultAccount) return null;
+  
+  const budgetData = await getCurrentBudget(defaultAccount.id);
+  
+  if (!budgetData) return null;
 
-  let budgetData = null;
-  if (defaultAccount) {
-    budgetData = await getCurrentBudget(defaultAccount.id);
-  }
+  return (
+    <BudgetProgress
+      initialBudget={budgetData?.budget}
+      currentExpenses={budgetData?.currentExpenses || 0}
+    />
+  );
+}
 
+async function OverviewSection() {
+  const accounts = await getUserAccounts();
   const transactions = await getDashboardData();
 
+  return <DashboardOverview accounts={accounts} transactions={transactions || []} />;
+}
+
+async function AccountsSection() {
+  const accounts = await getUserAccounts();
+
+  return (
+    <>
+      {accounts.length > 0 &&
+        accounts?.map((account) => {
+          return <AccountCard key={account.id} account={account} />;
+        })}
+    </>
+  );
+}
+
+async function Dashboard() {
   return (
     <section className="px-5 space-y-8">
       {/* Budget Progress */}
-      {defaultAccount && budgetData && (
-        <BudgetProgress
-          initialBudget={budgetData?.budget}
-          currentExpenses={budgetData?.currentExpenses || 0}
-        />
-      )}
+      <Suspense fallback={<BudgetSkeleton />}>
+        <BudgetSection />
+      </Suspense>
+
       {/* Overview */}
-      <Suspense fallback={"Loading Overview..."}>
-        <DashboardOverview accounts={accounts} transactions={transactions || []} />
+      <Suspense fallback={<OverviewSkeleton />}>
+        <OverviewSection />
       </Suspense>
 
       {/* Account Grid */}
@@ -45,10 +75,15 @@ async function Dashboard() {
           </Card>
         </CreateAccountDrawer>
 
-        {accounts.length > 0 &&
-          accounts?.map((account) => {
-            return <AccountCard key={account.id} account={account} />;
-          })}
+        <Suspense fallback={
+          <>
+            <SkeletonCard />
+            <SkeletonCard />
+            <SkeletonCard />
+          </>
+        }>
+          <AccountsSection />
+        </Suspense>
       </div>
     </section>
   );

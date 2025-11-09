@@ -2,8 +2,23 @@ import { getAccountWithTransactions } from "@/actions/accounts";
 import notfound from "@/app/not-found";
 import React, { Suspense } from "react";
 import TransactionTable from "../_components/transaction-table";
-import { BarLoader } from "react-spinners";
 import AccountChart from "../_components/account-chart";
+import { CardLoader, TableSkeleton } from "@/components/loading";
+
+// Separate async components for each section
+async function ChartSection({ id }) {
+  const accountData = await getAccountWithTransactions(id);
+  if (!accountData) return null;
+  
+  return <AccountChart transactions={accountData.transactions} />;
+}
+
+async function TransactionSection({ id }) {
+  const accountData = await getAccountWithTransactions(id);
+  if (!accountData) return null;
+  
+  return <TransactionTable transactions={accountData.transactions} />;
+}
 
 async function UserAccount({ params }) {
   const { id } = await params;
@@ -30,13 +45,13 @@ async function UserAccount({ params }) {
       </div>
       </div>
       {/* Chart section */}
-      <Suspense fallback={<BarLoader className="mt-4" width={"100%"} color="#9333ea"/>}>
-        <AccountChart transactions={transactions} />
+      <Suspense fallback={<CardLoader />}>
+        <ChartSection id={id} />
       </Suspense>
 
       {/* Transaction section */}
-      <Suspense fallback={<BarLoader className="mt-4" width={"100%"} color="#9333ea"/>}>
-        <TransactionTable transactions={transactions} />
+      <Suspense fallback={<TableSkeleton rows={8} />}>
+        <TransactionSection id={id} />
       </Suspense>
     </div>
   );

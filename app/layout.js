@@ -1,8 +1,9 @@
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { ClerkProvider } from "@clerk/nextjs";
 import Header from "@/components/header";
+import ClerkProviderClient from "@/components/clerk-provider-client";
 import { Toaster } from "sonner";
+import { NavigationProgress } from "@/components/navigation-progress";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -13,11 +14,12 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <ClerkProvider>
-      <html lang="en">
-        <body className={`${inter.className}`}>
+    <html lang="en">
+      <body className={`${inter.className}`}>
+        <ClerkProviderClient>
+          <NavigationProgress />
           {/* header */}
-          <Header/>
+          <Header />
           <main className="min-h-screen">{children}</main>
           <Toaster richColors />
           {/* footer */}
@@ -26,8 +28,8 @@ export default function RootLayout({ children }) {
               <p>Made with 💗 by VickySingh</p>
             </div>
           </footer>
-        </body>
-      </html>
-    </ClerkProvider>
+        </ClerkProviderClient>
+      </body>
+    </html>
   );
 }

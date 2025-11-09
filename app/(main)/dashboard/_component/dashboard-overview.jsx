@@ -23,13 +23,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
 const COLORS = [
-  "#FF6B6B",
-  "#4ECDC4",
-  "#45B7D1",
-  "#96CEB4",
-  "#FFEEAD",
-  "#D4A5A5",
-  "#9FA8DA",
+  "#9333EA", // purple-600
+  "#EC4899", // pink-600
+  "#3B82F6", // blue-600
+  "#8B5CF6", // violet-600
+  "#D946EF", // fuchsia-600
+  "#A855F7", // purple-500
+  "#F472B6", // pink-400
 ];
 
 function DashboardOverview({ accounts, transactions }) {
@@ -77,18 +77,21 @@ function DashboardOverview({ accounts, transactions }) {
   );
 
   return (
-    <div className="grid gap-4 md:grid-cols-2">
+    <div className="grid gap-6 md:grid-cols-2">
       {/* Recent Transactions Card */}
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-          <CardTitle className="text-base font-normal">
+      <Card className="border-2 border-purple-100 shadow-lg bg-white">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4 border-b border-purple-100">
+          <CardTitle className="text-xl font-bold text-gray-900 flex items-center gap-2">
+            <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
+              <span className="text-white text-sm">📊</span>
+            </div>
             Recent Transactions
           </CardTitle>
           <Select
             value={selectedAccountId}
             onValueChange={setSelectedAccountId}
           >
-            <SelectTrigger className="w-[140px]">
+            <SelectTrigger className="w-[160px] border-purple-300 focus:border-purple-500 focus:ring-purple-500">
               <SelectValue placeholder="Select account" />
             </SelectTrigger>
             <SelectContent>
@@ -100,40 +103,51 @@ function DashboardOverview({ accounts, transactions }) {
             </SelectContent>
           </Select>
         </CardHeader>
-        <CardContent>
+        <CardContent className="pt-6">
           <div className="space-y-4">
             {recentTransactions.length === 0 ? (
-              <p className="text-center text-muted-foreground py-4">
-                No recent transactions
-              </p>
+              <div className="text-center py-8">
+                <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                  <span className="text-3xl">💳</span>
+                </div>
+                <p className="text-gray-600 font-medium">No recent transactions</p>
+                <p className="text-sm text-gray-500 mt-1">Start adding transactions to see them here</p>
+              </div>
             ) : (
               recentTransactions.map((transaction) => (
                 <div
                   key={transaction.id}
-                  className="flex items-center justify-between"
+                  className="flex items-center justify-between p-3 rounded-lg hover:bg-purple-50 transition-colors border border-transparent hover:border-purple-200"
                 >
-                  <div className="space-y-1">
-                    <p className="text-sm font-medium leading-none">
+                  <div className="space-y-1 flex-1">
+                    <p className="text-sm font-bold text-gray-900">
                       {transaction.description || "Untitled Transaction"}
                     </p>
-                    <p className="text-sm text-muted-foreground">
-                      {format(new Date(transaction.date), "PP")}
+                    <p className="text-xs text-gray-600 font-medium">
+                      {format(new Date(transaction.date), "PPP")}
                     </p>
                   </div>
                   <div className="flex items-center gap-2">
                     <div
                       className={cn(
-                        "flex items-center",
+                        "flex items-center font-bold text-base",
                         transaction.type === "EXPENSE"
-                          ? "text-red-500"
-                          : "text-green-500"
+                          ? "text-red-600"
+                          : "text-green-600"
                       )}
                     >
-                      {transaction.type === "EXPENSE" ? (
-                        <ArrowDownRight className="mr-1 h-4 w-4" />
-                      ) : (
-                        <ArrowUpRight className="mr-1 h-4 w-4" />
-                      )}
+                      <div className={cn(
+                        "w-8 h-8 rounded-full flex items-center justify-center mr-2",
+                        transaction.type === "EXPENSE"
+                          ? "bg-red-100"
+                          : "bg-green-100"
+                      )}>
+                        {transaction.type === "EXPENSE" ? (
+                          <ArrowDownRight className="h-4 w-4" />
+                        ) : (
+                          <ArrowUpRight className="h-4 w-4" />
+                        )}
+                      </div>
                       ${transaction.amount.toFixed(2)}
                     </div>
                   </div>
@@ -145,17 +159,24 @@ function DashboardOverview({ accounts, transactions }) {
       </Card>
 
       {/* Expense Breakdown Card */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base font-normal">
+      <Card className="border-2 border-purple-100 shadow-lg bg-white">
+        <CardHeader className="border-b border-purple-100">
+          <CardTitle className="text-xl font-bold text-gray-900 flex items-center gap-2">
+            <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
+              <span className="text-white text-sm">📈</span>
+            </div>
             Monthly Expense Breakdown
           </CardTitle>
         </CardHeader>
         <CardContent className="p-0 pb-5">
           {pieChartData.length === 0 ? (
-            <p className="text-center text-muted-foreground py-4">
-              No expenses this month
-            </p>
+            <div className="text-center py-12">
+              <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                <span className="text-3xl">📊</span>
+              </div>
+              <p className="text-gray-600 font-medium">No expenses this month</p>
+              <p className="text-sm text-gray-500 mt-1">Your expense breakdown will appear here</p>
+            </div>
           ) : (
             <div className="h-[300px]">
               <ResponsiveContainer width="100%" height="100%">
@@ -179,9 +200,10 @@ function DashboardOverview({ accounts, transactions }) {
                   <Tooltip
                     formatter={(value) => `$${value.toFixed(2)}`}
                     contentStyle={{
-                      backgroundColor: "hsl(var(--popover))",
-                      border: "1px solid hsl(var(--border))",
-                      borderRadius: "var(--radius)",
+                      backgroundColor: "white",
+                      border: "2px solid #E9D5FF",
+                      borderRadius: "0.5rem",
+                      boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)"
                     }}
                   />
                   <Legend />

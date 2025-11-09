@@ -15,7 +15,7 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body className={`${inter.className}`}>
+      <body className={`${inter.className} bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50`}>
         <ClerkProviderClient>
           <NavigationProgress />
           {/* header */}
@@ -23,9 +23,9 @@ export default function RootLayout({ children }) {
           <main className="min-h-screen">{children}</main>
           <Toaster richColors />
           {/* footer */}
-          <footer className="bg-blue-50 py-12">
-            <div className="container mx-auto px-4 text-center text-gray-600">
-              <p>Made with 💗 by VickySingh</p>
+          <footer className="bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600 py-12 mt-20">
+            <div className="container mx-auto px-4 text-center text-white">
+              <p className="font-semibold">Made with 💗 by VickySingh</p>
             </div>
           </footer>
         </ClerkProviderClient>

@@ -73,13 +73,16 @@ function AccountChart({ transactions }) {
 
   return (
     <div>
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-7">
-          <CardTitle className="text-base font-normal">
+      <Card className="border-2 border-purple-100 shadow-xl bg-white">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-7 border-b border-purple-100">
+          <CardTitle className="text-xl font-bold text-gray-900 flex items-center gap-2">
+            <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
+              <span className="text-white text-sm">📊</span>
+            </div>
             Transaction Overview
           </CardTitle>
           <Select defaultValue={dateRange} onValueChange={setDateRange}>
-            <SelectTrigger className="w-[140px]">
+            <SelectTrigger className="w-[160px] border-purple-300 focus:border-purple-500 focus:ring-purple-500">
               <SelectValue placeholder="Select range" />
             </SelectTrigger>
             <SelectContent>
@@ -93,27 +96,27 @@ function AccountChart({ transactions }) {
             </SelectContent>
           </Select>
         </CardHeader>
-        <CardContent>
-          <div className="flex justify-around mb-6 text-sm">
-            <div className="text-center">
-              <p className="text-muted-foreground">Total Income</p>
-              <p className="text-lg font-bold text-green-500">
+        <CardContent className="pt-6">
+          <div className="grid grid-cols-3 gap-4 mb-6">
+            <div className="text-center bg-green-50 rounded-xl p-4 border-2 border-green-200">
+              <p className="text-sm font-semibold text-gray-600 mb-1">Total Income</p>
+              <p className="text-2xl font-black text-green-600">
                 ${totals.income.toFixed(2)}
               </p>
             </div>
-            <div className="text-center">
-              <p className="text-muted-foreground">Total Expenses</p>
-              <p className="text-lg font-bold text-red-500">
+            <div className="text-center bg-red-50 rounded-xl p-4 border-2 border-red-200">
+              <p className="text-sm font-semibold text-gray-600 mb-1">Total Expenses</p>
+              <p className="text-2xl font-black text-red-600">
                 ${totals.expense.toFixed(2)}
               </p>
             </div>
-            <div className="text-center">
-              <p className="text-muted-foreground">Net</p>
+            <div className="text-center bg-purple-50 rounded-xl p-4 border-2 border-purple-200">
+              <p className="text-sm font-semibold text-gray-600 mb-1">Net Balance</p>
               <p
-                className={`text-lg font-bold ${
+                className={`text-2xl font-black ${
                   totals.income - totals.expense >= 0
-                    ? "text-green-500"
-                    : "text-red-500"
+                    ? "text-green-600"
+                    : "text-red-600"
                 }`}
               >
                 ${(totals.income - totals.expense).toFixed(2)}
@@ -131,27 +134,36 @@ function AccountChart({ transactions }) {
                   bottom: 0,
                 }}
               >
-                <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                <XAxis dataKey="date" />
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E9D5FF" />
+                <XAxis dataKey="date" stroke="#9333EA" fontSize={12} />
                 <YAxis
                   fontSize={12}
                   tickLine={false}
                   axisLine={false}
+                  stroke="#9333EA"
                   tickFormatter={(value) => `$${value}`}
                 />
-                <Tooltip formatter={(value) => [`$${value}`, undefined]} />
+                <Tooltip 
+                  formatter={(value) => [`$${value}`, undefined]}
+                  contentStyle={{
+                    backgroundColor: "white",
+                    border: "2px solid #E9D5FF",
+                    borderRadius: "0.5rem",
+                    boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)"
+                  }}
+                />
                 <Legend />
                 <Bar
                   dataKey="income"
                   name="Income"
                   fill="#22c55e"
-                  radius={[4, 4, 0, 0]}
+                  radius={[8, 8, 0, 0]}
                 />
                 <Bar
                   dataKey="expense"
                   name="Expense"
                   fill="#ef4444"
-                  radius={[4, 4, 0, 0]}
+                  radius={[8, 8, 0, 0]}
                 />
               </BarChart>
             </ResponsiveContainer>

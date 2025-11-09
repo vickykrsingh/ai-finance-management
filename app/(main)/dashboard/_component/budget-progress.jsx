@@ -58,18 +58,23 @@ function BudgetProgress({ initialBudget, currentExpenses }) {
     setIsEditing(false);
   };
   return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+    <Card className="border-2 border-purple-100 shadow-lg bg-gradient-to-br from-white to-purple-50">
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4 border-b border-purple-100">
         <div className="flex-1">
-          <CardTitle>Monthly Budget (Default Account)</CardTitle>
-          <div className="flex items-center gap-2 mt-1">
+          <CardTitle className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+            <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
+              <span className="text-white text-xl">💰</span>
+            </div>
+            Monthly Budget
+          </CardTitle>
+          <div className="flex items-center gap-2 mt-3">
             {isEditing ? (
               <div className="flex items-center gap-2">
                 <Input
                   type="number"
                   value={newBudget}
                   onChange={(e) => setNewBudget(e.target.value)}
-                  className="w-32"
+                  className="w-40 border-purple-300 focus:border-purple-500 focus:ring-purple-500"
                   placeholder="Enter amount"
                   autoFocus
                   disabled={isLoading}
@@ -79,21 +84,23 @@ function BudgetProgress({ initialBudget, currentExpenses }) {
                   size="icon"
                   disabled={isLoading}
                   onClick={handleUpdateBudget}
+                  className="hover:bg-green-100"
                 >
-                  <Check className="h-4 w-4 text-green-500" />
+                  <Check className="h-5 w-5 text-green-600" />
                 </Button>
                 <Button
                   disabled={isLoading}
                   variant="ghost"
                   size="icon"
                   onClick={handleCancel}
+                  className="hover:bg-red-100"
                 >
-                  <X className="h-4 w-4 text-red-500" />
+                  <X className="h-5 w-5 text-red-600" />
                 </Button>
               </div>
             ) : (
               <>
-                <CardDescription>
+                <CardDescription className="text-base font-semibold text-gray-700">
                   {initialBudget
                     ? `$${currentExpenses.toFixed(
                         2
@@ -104,33 +111,47 @@ function BudgetProgress({ initialBudget, currentExpenses }) {
                   variant="ghost"
                   size="icon"
                   onClick={() => setIsEditing(true)}
-                  className="h-6 w-6"
+                  className="h-8 w-8 hover:bg-purple-100 text-purple-600"
                 >
-                  <Pencil className="h-3 w-3" />
+                  <Pencil className="h-4 w-4" />
                 </Button>
               </>
             )}
           </div>
         </div>
       </CardHeader>
-      <CardContent>
+      <CardContent className="pt-6">
         {initialBudget && (
-          <div className="space-y-2">
-            <Progress
-              extraStyles={`${
+          <div className="space-y-4">
+            <div className="relative">
+              <Progress
+                extraStyles={`${
+                  percentUsed >= 90
+                    ? "bg-gradient-to-r from-red-500 to-red-600"
+                    : percentUsed >= 75
+                    ? "bg-gradient-to-r from-yellow-500 to-orange-500"
+                    : "bg-gradient-to-r from-purple-500 to-pink-500"
+                }`}
+                value={percentUsed<=100?percentUsed:100}
+                className="h-4"
+              />
+            </div>
+            <div className="flex justify-between items-center">
+              <p className="text-sm font-semibold text-gray-600">
+                Progress: {percentUsed.toFixed(1)}% used
+              </p>
+              <div className={`px-3 py-1 rounded-full text-xs font-bold ${
                 percentUsed >= 90
-                  ? "bg-red-500"
+                  ? "bg-red-100 text-red-700"
                   : percentUsed >= 75
-                  ? "bg-yellow-500"
-                  : "bg-green-500"
-              }`}
-              value={percentUsed<=100?percentUsed:100}
-            />
+                  ? "bg-yellow-100 text-yellow-700"
+                  : "bg-green-100 text-green-700"
+              }`}>
+                {percentUsed >= 90 ? "⚠️ Over Budget" : percentUsed >= 75 ? "⚡ High Usage" : "✅ On Track"}
+              </div>
+            </div>
           </div>
         )}
-        <p className="text-xs text-muted-foreground text-right mt-2">
-          {percentUsed.toFixed(1)}% used
-        </p>
       </CardContent>
     </Card>
   );

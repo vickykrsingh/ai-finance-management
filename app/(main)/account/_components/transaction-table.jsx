@@ -162,71 +162,73 @@ function TransactionTable({ transactions }) {
 
   return (
     <div className="space-y-4">
-      {deleteLoading&&<BarLoader className="mt-4" width={"100%"} color="#9333ea" />}
+      {deleteLoading && <BarLoader className="mt-4" width={"100%"} color="#9333ea" />}
       {/* Filters */}
-      <div className="flex flex-col sm:flex-row gap-4">
-        <div className="relative flex-1">
-          <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search transactions..."
-            onChange={(e) => setSearchTerm(e.target.value)}
-            value={searchTerm}
-            className="pl-8"
-          />
-        </div>
-        <div className="flex gap-2">
-          <Select value={typeFilter} onValueChange={setTypeFilter}>
-            <SelectTrigger>
-              <SelectValue placeholder="All Types" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="INCOME">Income</SelectItem>
-              <SelectItem value="EXPENSE">Expense</SelectItem>
-            </SelectContent>
-          </Select>
-          <Select
-            value={recurringFilter}
-            onValueChange={(value) => setRecurringFilter(value)}
-          >
-            <SelectTrigger className="w-[140px]">
-              <SelectValue placeholder="All Transactions" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="recurring">Recurring Only</SelectItem>
-              <SelectItem value="non-recurring">Non-Recurring Only</SelectItem>
-            </SelectContent>
-          </Select>
-          {selectedIds.length > 0 && (
-            <div className="flex items-center gap-2">
-              <Button
-                variant="destructive"
-                size="sm"
-                onClick={handleBulkDelete}
-              >
-                {" "}
-                <Trash className="h-4 w-4 mr-2" /> Delete Selected (
-                {selectedIds.length})
-              </Button>
-            </div>
-          )}
-          {(searchTerm || typeFilter || recurringFilter) && (
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={handleClearFilters}
-              title="Clear Filters"
+      <div className="bg-white rounded-xl shadow-lg p-6 border-2 border-purple-100">
+        <div className="flex flex-col sm:flex-row gap-4">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-3 h-5 w-5 text-purple-400" />
+            <Input
+              placeholder="Search transactions..."
+              onChange={(e) => setSearchTerm(e.target.value)}
+              value={searchTerm}
+              className="pl-10 border-purple-300 focus:border-purple-500 focus:ring-purple-500 font-medium"
+            />
+          </div>
+          <div className="flex gap-2 flex-wrap">
+            <Select value={typeFilter} onValueChange={setTypeFilter}>
+              <SelectTrigger className="w-[140px] border-purple-300 focus:border-purple-500 focus:ring-purple-500">
+                <SelectValue placeholder="All Types" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="INCOME">💰 Income</SelectItem>
+                <SelectItem value="EXPENSE">💸 Expense</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select
+              value={recurringFilter}
+              onValueChange={(value) => setRecurringFilter(value)}
             >
-              <X className="h-4 w-4" />
-            </Button>
-          )}
+              <SelectTrigger className="w-[180px] border-purple-300 focus:border-purple-500 focus:ring-purple-500">
+                <SelectValue placeholder="All Transactions" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="recurring">🔄 Recurring Only</SelectItem>
+                <SelectItem value="non-recurring">📋 Non-Recurring Only</SelectItem>
+              </SelectContent>
+            </Select>
+            {selectedIds.length > 0 && (
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={handleBulkDelete}
+                  className="bg-red-600 hover:bg-red-700 font-semibold"
+                >
+                  <Trash className="h-4 w-4 mr-2" /> Delete ({selectedIds.length})
+                </Button>
+              </div>
+            )}
+            {(searchTerm || typeFilter || recurringFilter) && (
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={handleClearFilters}
+                title="Clear Filters"
+                className="border-purple-300 hover:bg-purple-50"
+              >
+                <X className="h-4 w-4 text-purple-600" />
+              </Button>
+            )}
+          </div>
         </div>
       </div>
 
       {/* Transactions */}
-      <div className="rounded-md border">
+      <div className="rounded-xl border-2 border-purple-100 shadow-lg overflow-hidden bg-white">
         <Table>
           <TableHeader>
-            <TableRow>
+            <TableRow className="bg-gradient-to-r from-purple-50 to-pink-50 hover:from-purple-100 hover:to-pink-100">
               <TableHead className="w-[50px]">
                 <Checkbox
                   onCheckedChange={handleSelectAll}
@@ -235,53 +237,54 @@ function TransactionTable({ transactions }) {
                       filteredAndSortedTransactions.length &&
                     filteredAndSortedTransactions.length > 0
                   }
+                  className="border-purple-400"
                 />
               </TableHead>
               <TableHead
-                className="cursor-pointer"
+                className="cursor-pointer font-bold text-gray-900"
                 onClick={() => handleSort("date")}
               >
                 <div className="flex items-center">
-                  Date{" "}
+                  📅 Date{" "}
                   {sortConfig.field === "date" &&
                     (sortConfig.direction === "asc" ? (
-                      <ChevronUp className="ml-1 h-4 w-4" />
+                      <ChevronUp className="ml-1 h-4 w-4 text-purple-600" />
                     ) : (
-                      <ChevronDown className="ml-1 h-4 w-4" />
+                      <ChevronDown className="ml-1 h-4 w-4 text-purple-600" />
                     ))}
                 </div>
               </TableHead>
-              <TableHead>Description</TableHead>
+              <TableHead className="font-bold text-gray-900">📝 Description</TableHead>
               <TableHead
-                className="cursor-pointer"
+                className="cursor-pointer font-bold text-gray-900"
                 onClick={() => handleSort("category")}
               >
                 <div className="flex items-center">
-                  Category{" "}
+                  🏷️ Category{" "}
                   {sortConfig.field === "category" &&
                     (sortConfig.direction === "asc" ? (
-                      <ChevronUp className="ml-1 h-4 w-4" />
+                      <ChevronUp className="ml-1 h-4 w-4 text-purple-600" />
                     ) : (
-                      <ChevronDown className="ml-1 h-4 w-4" />
+                      <ChevronDown className="ml-1 h-4 w-4 text-purple-600" />
                     ))}
                 </div>
               </TableHead>
               <TableHead
-                className="cursor-pointer"
+                className="cursor-pointer font-bold text-gray-900"
                 onClick={() => handleSort("amount")}
               >
                 <div className="flex items-center justify-end">
-                  Amount{" "}
+                  💵 Amount{" "}
                   {sortConfig.field === "amount" &&
                     (sortConfig.direction === "asc" ? (
-                      <ChevronUp className="ml-1 h-4 w-4" />
+                      <ChevronUp className="ml-1 h-4 w-4 text-purple-600" />
                     ) : (
-                      <ChevronDown className="ml-1 h-4 w-4" />
+                      <ChevronDown className="ml-1 h-4 w-4 text-purple-600" />
                     ))}
                 </div>
               </TableHead>
-              <TableHead>Recurring</TableHead>
-              <TableHead className="w-[50px]"></TableHead>
+              <TableHead className="font-bold text-gray-900">🔄 Recurring</TableHead>
+              <TableHead className="w-[50px] font-bold text-gray-900">⚙️</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -289,42 +292,50 @@ function TransactionTable({ transactions }) {
               <TableRow>
                 <TableCell
                   colSpan={7}
-                  className="text-center text-muted-foreground"
+                  className="text-center py-12"
                 >
-                  No Transaction Found
+                  <div className="flex flex-col items-center gap-3">
+                    <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center">
+                      <span className="text-3xl">📋</span>
+                    </div>
+                    <p className="text-gray-600 font-semibold">No Transactions Found</p>
+                    <p className="text-sm text-gray-500">Try adjusting your filters or add a new transaction</p>
+                  </div>
                 </TableCell>
               </TableRow>
             ) : (
               filteredAndSortedTransactions.map((transaction) => (
-                <TableRow key={transaction.id}>
-                  <TableCell className="">
+                <TableRow key={transaction.id} className="hover:bg-purple-50 transition-colors">
+                  <TableCell>
                     <Checkbox
                       onCheckedChange={() => handleSelect(transaction.id)}
                       checked={selectedIds.includes(transaction.id)}
+                      className="border-purple-400"
                     />
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="font-medium text-gray-700">
                     {format(new Date(transaction.date), "PP")}
                   </TableCell>
-                  <TableCell>{transaction.description}</TableCell>
+                  <TableCell className="font-semibold text-gray-900">{transaction.description}</TableCell>
                   <TableCell className="capitalize">
-                    <span
+                    <Badge
                       style={{
                         background: categoryColors[transaction.category],
                       }}
-                      className="px-2 py-1 rounded text-white text-sm"
+                      className="px-3 py-1 rounded-full text-white text-sm font-semibold shadow-md"
                     >
                       {transaction.category}
-                    </span>
+                    </Badge>
                   </TableCell>
-                  <TableCell
-                    className="text-right font-medium"
-                    style={{
-                      color: transaction.type === "EXPENSE" ? "red" : "green",
-                    }}
-                  >
-                    {transaction.type === "EXPENSE" ? "-" : "+"}$
-                    {transaction.amount.toFixed(2)}
+                  <TableCell className="text-right">
+                    <span
+                      className={`font-bold text-lg ${
+                        transaction.type === "EXPENSE" ? "text-red-600" : "text-green-600"
+                      }`}
+                    >
+                      {transaction.type === "EXPENSE" ? "-" : "+"}$
+                      {transaction.amount.toFixed(2)}
+                    </span>
                   </TableCell>
                   <TableCell>
                     {transaction.isRecurring ? (
@@ -333,7 +344,7 @@ function TransactionTable({ transactions }) {
                           <TooltipTrigger>
                             <Badge
                               variant="outline"
-                              className="gap-1 bg-purple-100 hover:bg-purple-200 text-purple-700"
+                              className="gap-1 bg-gradient-to-r from-purple-100 to-pink-100 hover:from-purple-200 hover:to-pink-200 text-purple-700 border-purple-300 font-semibold"
                             >
                               <RefreshCw className="h-3 w-3" />
                               {

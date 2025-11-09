@@ -53,7 +53,17 @@ async function AccountsSection() {
 
 async function Dashboard() {
   return (
-    <section className="px-5 space-y-8">
+    <section className="px-5 py-8 space-y-8 max-w-7xl mx-auto">
+      {/* Page Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-4xl font-black bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-pink-600">
+            Dashboard
+          </h1>
+          <p className="text-gray-600 mt-2">Welcome back! Here's your financial overview</p>
+        </div>
+      </div>
+
       {/* Budget Progress */}
       <Suspense fallback={<BudgetSkeleton />}>
         <BudgetSection />
@@ -65,25 +75,34 @@ async function Dashboard() {
       </Suspense>
 
       {/* Account Grid */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        <CreateAccountDrawer>
-          <Card className="hover:shadow-md transition-shadow  cursor-pointer border-dashed">
-            <CardContent className="flex flex-col items-center justify-center text-muted-foreground h-full pt-5">
-              <Plus className="h-10 w-10 mb-2" />
-              <p className="text-sm font-medium">Add New Account</p>
-            </CardContent>
-          </Card>
-        </CreateAccountDrawer>
+      <div>
+        <h2 className="text-2xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+          Your Accounts
+          <span className="text-sm font-normal text-gray-500">(Click to view details)</span>
+        </h2>
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <CreateAccountDrawer>
+            <Card className="group hover:shadow-xl transition-all duration-300 cursor-pointer border-2 border-dashed border-purple-300 hover:border-purple-500 bg-gradient-to-br from-purple-50 to-pink-50 hover:scale-105">
+              <CardContent className="flex flex-col items-center justify-center text-purple-600 h-full pt-5 min-h-[180px]">
+                <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                  <Plus className="h-8 w-8 text-white" />
+                </div>
+                <p className="text-base font-bold">Add New Account</p>
+                <p className="text-xs text-gray-600 mt-1">Create a new financial account</p>
+              </CardContent>
+            </Card>
+          </CreateAccountDrawer>
 
-        <Suspense fallback={
-          <>
-            <SkeletonCard />
-            <SkeletonCard />
-            <SkeletonCard />
-          </>
-        }>
-          <AccountsSection />
-        </Suspense>
+          <Suspense fallback={
+            <>
+              <SkeletonCard />
+              <SkeletonCard />
+              <SkeletonCard />
+            </>
+          }>
+            <AccountsSection />
+          </Suspense>
+        </div>
       </div>
     </section>
   );

@@ -16,8 +16,18 @@ async function AddTransactionPage({searchParams}) {
     initialData = transaction;
   }
   return (
-    <div className='max-w-3xl mx-auto px-5'>
-      <h1 className='text-5xl gradient-title' >{editId?"Edit":"Add"} Transaction</h1>
+    <div className='max-w-4xl mx-auto px-5 py-8'>
+      <div className='mb-8'>
+        <h1 className='text-5xl font-black mb-3'>
+          <span className='bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-pink-600'>
+            {editId ? "Edit" : "Add New"}
+          </span>
+          {" "}Transaction
+        </h1>
+        <p className='text-gray-600 text-lg'>
+          {editId ? "Update your transaction details" : "Record your income or expense transaction"}
+        </p>
+      </div>
       <AddTransactionForm accounts={accounts} categories={defaultCategories} editMode={!!editId} initialData={initialData} />
     </div>
   )

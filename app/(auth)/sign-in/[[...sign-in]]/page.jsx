@@ -26,7 +26,7 @@ function Page() {
           </p>
           <div className="bg-gray-100 p-6 rounded-lg border border-gray-300">
             <p className="text-lg font-medium text-gray-800 mb-3">
-              <span className="text-blue-600">Email:</span> test@email.com
+              <span className="text-blue-600">Email:</span> test@gmail.com
             </p>
             <p className="text-lg font-medium text-gray-800">
               <span className="text-blue-600">Password:</span> test-user27
